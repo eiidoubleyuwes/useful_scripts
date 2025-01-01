@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>75 Hard Challenge Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7fb;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4A90E2;
+        }
+
+        label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: block;
+            color: #555;
+        }
+
+        input[type="date"],
+        input[type="checkbox"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4A90E2;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1rem;
+            margin-top: 20px;
+            color: #28a745;
+        }
+
+        .message.error {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>75 Hard Challenge Generator</h1>
+        <form id="challengeForm">
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="danielFast">Include Daniel Fast:</label>
+                <input type="checkbox" id="danielFast" name="danielFast">
+            </div>
+
+            <button type="submit">Generate Challenge</button>
+        </form>
+
+        <p id="message" class="message"></p>
+    </div>
+
+    <script>
+        document.getElementById("challengeForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const startDate = document.getElementById("startDate").value;
+            const danielFast = document.getElementById("danielFast").checked;
+
+            if (!startDate) {
+                alert("Please select a start date!");
+                return;
+            }
+
+            const response = await fetch("http://172.17.0.2:5000/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ startDate, danielFast }),
+            });
+
+            const messageElement = document.getElementById("message");
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const link = document.createElement("a");
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "75_Hard_Challenge.md";
+                link.click();
+                messageElement.textContent = "File downloaded successfully!";
+                messageElement.classList.remove("error");
+                messageElement.classList.add("success");
+            } else {
+                messageElement.textContent = "Failed to generate the file.";
+                messageElement.classList.remove("success");
+                messageElement.classList.add("error");
+            }
+        });
+    </script>
+</body>
+
+</html>
